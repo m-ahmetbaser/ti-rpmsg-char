@@ -1,0 +1,79 @@
+TI RPMsg Char Package
+======================
+
+1. Introduction
+----------------
+This repo contains the source code for a small rpmsg-char utility library
+and some basic examples and/or tests exercising the API provided by the
+ti_rpmsg_char library. The library is primarily designed to provide Linux
+applications an easy means to open and identify rpmsg character devices
+created by the Linux kernel rpmsg-char driver using the virtio-rpmsg-bus
+transport back-end.
+
+The library currently supports the TI K3 AM65x, J721E and J7200 SoCs, but
+can be easily scaled to support other SoCs.
+
+
+2. Sources
+-----------
+The repo is maintained as a git tree, and so the sources can simply be
+downloaded using git.
+
+  git clone git://git.ti.com/rpmsg/ti-rpmsg-char.git
+
+The following is the directory structure for this package:
+ - src      : Library source code and internal header files
+ - include  : Public exported headers for applications usage
+ - examples : Example source code
+
+
+3. API
+-------
+The library provides only 4 basic API. Please see the documentation in
+include/ti_rpmsg_char.h for each of the API and function arguments.
+
+ - rpmsg_char_init()
+ - rpmsg_char_exit()
+ - rpmsg_char_open()
+ - rpmsg_char_close()
+
+Applications need only include the ti_rpmsg_char.h. All the remoteproc
+ids to be used are defined in rproc_id.h, which is already included in
+ti_rpmsg_char.h.
+
+
+4. Build
+---------
+
+4.1 Infrastructure Tools
+The package uses the autotools infrastructure for build. The following
+versions are used:
+    GNU autoconf : 2.69
+    GNU automake : 1.15.1
+    GNU libtool  : 2.4.6
+
+The following Arm cross-compilers are used to build the library and
+examples:
+    v8 Compiler  : gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu
+    v7 Compiler  : gcc-arm-9.2-2019.12-x86_64-arm-none-linux-gnueabihf
+
+4.2 Build Steps
+ 1. Install the necessary autotools and compilers
+ 2. Add the installed compiler bin path to your PATH variable
+      eg: export PATH=<install_path>/gcc-arm-9.2-2019.12-aarch64/bin:$PATH
+ 3. Configure the autotools with necessary host and optional prefix to be
+    used to install the build libraries and executables
+      cd <ti-rpmsg-char-dir>
+      autoreconf -i
+      ./configure --host=aarch64-none-linux-gnu --prefix=<target-dir>
+ 4. Build and Install
+      make
+      make install
+
+4.3 Clean Steps
+  1. Use the desired generic Makefile targets
+       make clean      : Erase the files built by make
+       make distclean  : clean + Erase the files created by the configure step
+       make uninstall  : Erase the installed libraries and executables
+  2. Use git clean to get the repo back to a pristine state
+       git clean -dfx
