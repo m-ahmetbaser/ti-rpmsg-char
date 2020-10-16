@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: ti-rpmsg-char
+Description: TI RPMsg Char utility library
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lti_rpmsg_char
+Cflags: -I${includedir}
