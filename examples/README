@@ -1,0 +1,28 @@
+rpmsg-char-simple application
+=============================
+
+rpmsg-char-simple is a very basic single-threaded application
+demonstrating the usage of the API provided by the ti-rpmsg-char
+library to communicate messages to a remote processor exercising
+the kernel rpmsg_char driver and virtio-rpmsg transport.
+
+Usage:
+  rpmsg_char_simple [-r <rproc_id>] [-n <num_msgs>] [-d <rpmsg_dev_name>] [-p <remote_endpt>]
+
+  Where:
+    -r <rproc_id>        remote processor id to be used.
+                         Valid values are 0 to RPROC_ID_MAX
+    -n <num_msgs>        Number of messages to exchange (default 100)
+    -d <rpmsg_dev_name>  rpmsg device name
+                         (defaults to NULL, translates to rpmsg_chrdev)
+    -p <remote_endpt>    remote end-point address of the rpmsg device
+                         (default 14 based on current example firmwares)
+
+Examples:
+1. rpmsg_char_simple -r 2 -d ti.ipc4.ping-pong -p 13
+     Runs the example using device "ti.ipc4.ping-pong" and remote port 13
+     with rproc_id value of 2 (R5F_MAIN0_0), exchanges 100 messages
+2. rpmsg_char_simple -r 4 -n 10
+     Runs the example using default rpmsg device "rpmsg_chrdev",
+     remote port 14 with rproc_id value of 4 (R5F_MAIN1_0), exchanges
+     10 messages

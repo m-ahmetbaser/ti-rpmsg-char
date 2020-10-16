@@ -66,7 +66,15 @@ examples:
       cd <ti-rpmsg-char-dir>
       autoreconf -i
       ./configure --host=aarch64-none-linux-gnu --prefix=<target-dir>
- 4. Build and Install
+ 4. Build and Install Library
+      make
+      make install
+ 5. Build Examples, the top-level Makefile builds only the library by
+    default
+      make -C examples
+      make -C examples install
+              or
+      cd examples
       make
       make install
 
@@ -75,5 +83,11 @@ examples:
        make clean      : Erase the files built by make
        make distclean  : clean + Erase the files created by the configure step
        make uninstall  : Erase the installed libraries and executables
-  2. Use git clean to get the repo back to a pristine state
+  2. Cleaning up examples specifically needs separate commands. It is all
+     similar to the commands in #1, but invoked with -C examples, or invoke
+     normally from within the examples folder
+       eg: make -C examples uninstall
+                     or
+           cd examples; make uninstall
+  3. Use git clean to get the repo back to a pristine state
        git clean -dfx

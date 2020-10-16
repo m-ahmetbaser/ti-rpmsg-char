@@ -49,7 +49,8 @@ AC_SUBST([AM_LDFLAGS])
 # Generate Makefile(s)
 AC_CONFIG_FILES([Makefile
                  src/Makefile
-                 src/ti_rpmsg_char.pc])
+                 src/ti_rpmsg_char.pc
+                 examples/Makefile])
 AC_OUTPUT
 
 echo \
