@@ -41,6 +41,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <linux/rpmsg.h>
@@ -463,6 +464,13 @@ static void _rpmsg_char_cleanup(void)
 	}
 }
 
+static void signal_handler(int sig)
+{
+	fprintf(stderr, "\nClean up and exit while handling signal %d\n", sig);
+	rpmsg_char_exit();
+	exit(EXIT_FAILURE);
+}
+
 rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
 				  int remote_endpt, char *eptdev_name,
 				  int flags)
@@ -572,6 +580,13 @@ int rpmsg_char_init(char *soc_name)
 	ret = _rpmsg_char_find_soc_family(soc_name, &soc_data);
 	if (ret < 0)
 		goto out;
+
+	/*
+	 * Setup the signal handlers, this ideally needs to be done in
+	 * applications
+	 */
+	signal(SIGINT, signal_handler);
+	signal(SIGTERM, signal_handler);
 
 	inited = true;
 
