@@ -449,13 +449,14 @@ static void _rpmsg_char_endpt_free(struct rpmsg_char_endpt *ept)
 
 static void _rpmsg_char_cleanup(void)
 {
-	struct rpmsg_char_endpt *iter;
+	struct rpmsg_char_endpt *iter, *next;
 	int ret;
 
 	if (ghead)
 		fprintf(stderr, "Application did not close some rpmsg_char devices\n");
 
-	for (iter = ghead; iter != NULL; iter = iter->next) {
+	for (iter = ghead; iter != NULL; iter = next) {
+		next = iter->next;
 		ret = rpmsg_char_close(&iter->rcdev);
 		if (ret) {
 			fprintf(stderr, "rpmsg_char_close failed during cleanup, rcdev = 0x%x, ret = %d\n",
