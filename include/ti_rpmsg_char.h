@@ -128,7 +128,10 @@ int rpmsg_char_close(rpmsg_char_dev_t *rcdev);
  *              detection and corresponding initialization. This needs to be
  *              invoked before being able to use any other function. This only
  *              needs to be invoked once in an application, there is no reference
- *              counting.
+ *              counting. The function also registers signal handlers optionally
+ *              (if none are installed prior) to perform any cleanup of stale
+ *              rpmsg endpoint devices during abnormal termination of
+ *              applications.
  *
  *  @param      soc_name  Name of the SoC family to be used for manual detection
  *                        if kernel doesn't support a socbus device for a
@@ -149,7 +152,9 @@ int rpmsg_char_init(char *soc_name);
  *              and any cleanup on the library. This is the last function that
  *              needs to be invoked after all usage is done as part of the
  *              application's cleanup. This only need to be invoked once in an
- *              application, there is no reference counting.
+ *              application, there is no reference counting. The function also
+ *              needs to be invoked in any application's signal handlers to
+ *              perform the necessary cleanup of stale rpmsg endpoint devices.
  *
  *  @ret        None
  *

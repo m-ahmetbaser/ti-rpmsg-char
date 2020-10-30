@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 
 # Initilize autoconf
-AC_INIT([ti-rpmsg-char], [0.1.0], [s-anna@ti.com])
+AC_INIT([ti-rpmsg-char], [0.2.0], [s-anna@ti.com])
 
 # Check common src files to ensure integrity of the package
 AC_CONFIG_SRCDIR([src/rpmsg_char.c])

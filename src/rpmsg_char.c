@@ -472,6 +472,36 @@ static void signal_handler(int sig)
 	exit(EXIT_FAILURE);
 }
 
+/*
+ * setup the signal handlers optionally, only if applications have not
+ * registered one themselves. Any new signal handler registration in
+ * the application after rpmsg_char_init() is invoked will install the
+ * application's handlers. Applications are responsible for calling
+ * rpmsg_char_exit() in their signal handlers (if present) to ensure
+ * proper cleanup
+ */
+static int _rpmsg_char_register_signal_handlers(void)
+{
+	struct sigaction sigint = { 0 };
+	struct sigaction sigterm = { 0 };
+	int ret;
+
+	ret = sigaction(SIGINT, NULL, &sigint);
+	if (ret < 0)
+		return -errno;
+
+	ret = sigaction(SIGTERM, NULL, &sigterm);
+	if (ret < 0)
+		return -errno;
+
+	if (!sigint.sa_sigaction)
+		signal(SIGINT, signal_handler);
+	if (!sigterm.sa_sigaction)
+		signal(SIGTERM, signal_handler);
+
+	return 0;
+}
+
 rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
 				  int remote_endpt, char *eptdev_name,
 				  int flags)
@@ -582,12 +612,9 @@ int rpmsg_char_init(char *soc_name)
 	if (ret < 0)
 		goto out;
 
-	/*
-	 * Setup the signal handlers, this ideally needs to be done in
-	 * applications
-	 */
-	signal(SIGINT, signal_handler);
-	signal(SIGTERM, signal_handler);
+	ret = _rpmsg_char_register_signal_handlers();
+	if (ret < 0)
+		goto out;
 
 	inited = true;
 
