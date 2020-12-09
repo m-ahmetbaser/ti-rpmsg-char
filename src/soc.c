@@ -42,7 +42,7 @@
 #include "rpmsg_char_internal.h"
 
 /* Increment this whenever new SoC data is added */
-#define NUM_SOC_FAMILY 3
+#define NUM_SOC_FAMILY 4
 
 struct soc_data {
 	const char *family_name;
@@ -77,6 +77,14 @@ const struct rproc_map j7200_map[] = {
 	{ .id = R5F_MAIN0_1, .rproc_name = "5d00000.r5f",  },
 };
 
+/* TI K3 AM64x SoCs */
+const struct rproc_map am64x_map[] = {
+	{ .id = R5F_MAIN0_0, .rproc_name = "78000000.r5f",  },
+	{ .id = R5F_MAIN0_1, .rproc_name = "78200000.r5f",  },
+	{ .id = R5F_MAIN1_0, .rproc_name = "78400000.r5f",  },
+	{ .id = R5F_MAIN1_1, .rproc_name = "78600000.r5f",  },
+};
+
 const struct soc_data socs[NUM_SOC_FAMILY] = {
 	{
 		.family_name = "AM65X",
@@ -92,6 +100,11 @@ const struct soc_data socs[NUM_SOC_FAMILY] = {
 		.family_name = "J7200",
 		.map = j7200_map,
 		.num_rprocs = (sizeof(j7200_map) / sizeof(struct rproc_map)),
+	},
+	{
+		.family_name = "AM64X",
+		.map = am64x_map,
+		.num_rprocs = (sizeof(am64x_map) / sizeof(struct rproc_map)),
 	},
 };
 
