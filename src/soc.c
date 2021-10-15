@@ -83,6 +83,7 @@ const struct rproc_map am64x_map[] = {
 	{ .id = R5F_MAIN0_1, .rproc_name = "78200000.r5f",  },
 	{ .id = R5F_MAIN1_0, .rproc_name = "78400000.r5f",  },
 	{ .id = R5F_MAIN1_1, .rproc_name = "78600000.r5f",  },
+	{ .id = M4F_MCU0_0,  .rproc_name = "5000000.m4fss",  },
 };
 
 const struct soc_data socs[NUM_SOC_FAMILY] = {
