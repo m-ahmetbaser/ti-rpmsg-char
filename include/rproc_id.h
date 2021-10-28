@@ -65,6 +65,7 @@ enum rproc_id {
 	DSP_C66_1,
 	DSP_C71_0,
 	M4F_MCU0_0,
+	DSP_C71_1,
 	RPROC_ID_MAX,
 };
 
