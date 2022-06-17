@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Texas Instruments Incorporated - https://www.ti.com
+ * Copyright (c) 2020-2022 Texas Instruments Incorporated - https://www.ti.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,6 +66,10 @@ enum rproc_id {
 	DSP_C71_0,
 	M4F_MCU0_0,
 	DSP_C71_1,
+	R5F_MAIN2_0,
+	R5F_MAIN2_1,
+	DSP_C71_2,
+	DSP_C71_3,
 	RPROC_ID_MAX,
 };
 

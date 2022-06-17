@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Texas Instruments Incorporated - https://www.ti.com
+ * Copyright (c) 2020-2022 Texas Instruments Incorporated - https://www.ti.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -42,7 +42,7 @@
 #include "rpmsg_char_internal.h"
 
 /* Increment this whenever new SoC data is added */
-#define NUM_SOC_FAMILY 6
+#define NUM_SOC_FAMILY 7
 
 struct soc_data {
 	const char *family_name;
@@ -98,9 +98,26 @@ const struct rproc_map j721s2_map[] = {
 	{ .id = DSP_C71_1,   .rproc_name = "65800000.dsp",   },
 };
 
+
 /* TI K3 AM62x SoCs */
 const struct rproc_map am62x_map[] = {
 	{ .id = M4F_MCU0_0,  .rproc_name = "5000000.m4fss",  },
+};
+
+/* TI K3 J784S4 SoCs */
+const struct rproc_map j784s4_map[] = {
+	{ .id = R5F_MCU0_0,  .rproc_name = "41000000.r5f",   },
+	{ .id = R5F_MCU0_1,  .rproc_name = "41400000.r5f",   },
+	{ .id = R5F_MAIN0_0, .rproc_name = "5c00000.r5f",    },
+	{ .id = R5F_MAIN0_1, .rproc_name = "5d00000.r5f",    },
+	{ .id = R5F_MAIN1_0, .rproc_name = "5e00000.r5f",    },
+	{ .id = R5F_MAIN1_1, .rproc_name = "5f00000.r5f",    },
+	{ .id = R5F_MAIN2_0, .rproc_name = "5900000.r5f",    },
+	{ .id = R5F_MAIN2_1, .rproc_name = "5a00000.r5f",    },
+	{ .id = DSP_C71_0,   .rproc_name = "64800000.dsp",   },
+	{ .id = DSP_C71_1,   .rproc_name = "65800000.dsp",   },
+	{ .id = DSP_C71_2,   .rproc_name = "66800000.dsp",   },
+	{ .id = DSP_C71_3,   .rproc_name = "67800000.dsp",   },
 };
 
 const struct soc_data socs[NUM_SOC_FAMILY] = {
@@ -133,6 +150,11 @@ const struct soc_data socs[NUM_SOC_FAMILY] = {
 		.family_name = "AM62X",
 		.map = am62x_map,
 		.num_rprocs = (sizeof(am62x_map) / sizeof(struct rproc_map)),
+	},
+	{
+		.family_name = "J784S4",
+		.map = j784s4_map,
+		.num_rprocs = (sizeof(j784s4_map) / sizeof(struct rproc_map)),
 	},
 };
 
