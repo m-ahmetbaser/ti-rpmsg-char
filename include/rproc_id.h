@@ -70,6 +70,7 @@ enum rproc_id {
 	R5F_MAIN2_1,
 	DSP_C71_2,
 	DSP_C71_3,
+	R5F_WKUP0_0,
 	RPROC_ID_MAX,
 };
 

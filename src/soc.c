@@ -102,6 +102,7 @@ const struct rproc_map j721s2_map[] = {
 /* TI K3 AM62x SoCs */
 const struct rproc_map am62x_map[] = {
 	{ .id = M4F_MCU0_0,  .rproc_name = "5000000.m4fss",  },
+	{ .id = R5F_WKUP0_0, .rproc_name = "78000000.r5f",   },
 };
 
 /* TI K3 J784S4 SoCs */
