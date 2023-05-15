@@ -46,7 +46,7 @@
 #include <sys/stat.h>
 #include <linux/rpmsg.h>
 
-#define RPMSG_ADDR_ANY		0xFFFFFFFF
+#define RPMSG_ADDR_ANY         0xFFFFFFFF
 
 #include "ti_rpmsg_char.h"
 #include "rpmsg_char_internal.h"
@@ -158,6 +158,7 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 	char fpath[512];
 	int i;
 	int ret = -ENODEV;
+	char dir_name[512];
 
 	for (i = 0; i < soc_data.num_rprocs; i++, r++) {
 		if (id == r->id)
@@ -190,8 +191,16 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 
 	/* retrieve the dynamically created kernel virtio id */
 	memset(&fpath, 0, sizeof(fpath));
-	sprintf(fpath, "%s/remoteproc/remoteproc%u/remoteproc%u#vdev0buffer",
+	sprintf(fpath, "%s/remoteproc/remoteproc%u/", ept->rpath, remoteproc_id);
+	/* check if virtio device is decoupled from remoteproc core */
+	if (get_child_dir_pattern(fpath,"rproc-virtio",dir_name) == 0) {
+		strcat(fpath,dir_name);
+	}
+	else {
+		sprintf(fpath, "%s/remoteproc/remoteproc%u/remoteproc%u#vdev0buffer",
 		ept->rpath, remoteproc_id, remoteproc_id);
+	}
+
 	ret = get_child_dir_suffix(fpath, "virtio%u", &virtio_id);
 	if (ret) {
 		if (ret == -ENOENT) {
@@ -260,7 +269,11 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 	}
 
 	/* get rpmsg_ctrl id */
-	ret = get_child_dir_suffix(fpath, "rpmsg_ctrl%u", &ctrl_id);
+	ret = get_child_dir_suffix(fpath, "rpmsg%u", &ctrl_id);
+	/* check for backward compatibility if failed */
+	if (ret)
+		ret = get_child_dir_suffix(fpath, "rpmsg_ctrl%u", &ctrl_id);
+
 	if (ret)
 		goto chrdev_nodir;
 
@@ -274,14 +287,13 @@ free_rpath:
 }
 
 static int _rpmsg_char_create_eptdev(struct rpmsg_char_endpt *ept,
-				     char *eptdev_name, int remote_port)
+				     char *eptdev_name, int local_port, int remote_port)
 {
 	int fd, ret;
 	char ctrldev_path[32] = { 0 };
 	struct rpmsg_endpoint_info ept_info = { 0 };
 
 	sprintf(ctrldev_path, "/dev/rpmsg_ctrl%u", ept->ctrl_id);
-
 	fd = open(ctrldev_path, O_RDWR);
 	if (fd < 0) {
 		fprintf(stderr, "%s: could not open rpmsg_ctrl dev node for id %d\n",
@@ -289,8 +301,15 @@ static int _rpmsg_char_create_eptdev(struct rpmsg_char_endpt *ept,
 		return fd;
 	}
 
-	/* let kernel dynamically allocate the local end-point */
-	ept_info.src = RPMSG_ADDR_ANY;
+	if ((local_port != (int) RPMSG_ADDR_ANY) && (local_port <
+					       RPMSG_RESERVED_ADDRESSES)) {
+		fprintf(stderr, "%s: invalid local address %d, should be more \
+			than %d \n", __func__, local_port,
+			RPMSG_RESERVED_ADDRESSES);
+		return 1;
+	}
+
+	ept_info.src = local_port;
 	ept_info.dst = remote_port;
 	sprintf(ept_info.name, "%s", eptdev_name);
 
@@ -413,6 +432,7 @@ static int _rpmsg_char_open_eptdev(struct rpmsg_char_endpt *ept,
 	endpt = _rpmsg_char_get_local_endpt(ept);
 	if (endpt < 0) {
 		_rpmsg_char_destroy_eptdev(efd);
+		fprintf(stdout, "%s: get_local_endpt failed %d \n",__func__,endpt);
 		return endpt;
 	}
 
@@ -503,12 +523,12 @@ static int _rpmsg_char_register_signal_handlers(void)
 }
 
 rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
-				  int remote_endpt, char *eptdev_name,
+				  int local_endpt, int remote_endpt, char *eptdev_name,
 				  int flags)
 {
 	struct rpmsg_char_endpt *ept = NULL;
 	char *def_dev_name = "rpmsg_chrdev";
-	int ret, local_endpt;
+	int ret;
 
 	pthread_mutex_lock(&mutex);
 
@@ -544,7 +564,7 @@ rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
 	if (ret)
 		goto out;
 
-	ret = _rpmsg_char_create_eptdev(ept, eptdev_name, remote_endpt);
+	ret = _rpmsg_char_create_eptdev(ept, eptdev_name, local_endpt, remote_endpt);
 	if (ret)
 		goto out;
 

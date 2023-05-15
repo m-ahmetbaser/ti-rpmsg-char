@@ -56,6 +56,8 @@ int _rpmsg_char_find_soc_family(const char *soc_name, struct soc_rprocs *soc);
 char *find_child_dir_by_name(DIR *parent, char *child_name);
 int get_child_dir_suffix(char *fpath, const char *child_name_pattern,
 			 unsigned int *suffix);
+int get_child_dir_pattern(char *fpath, const char *child_name_pattern,
+			 char *dir);
 char *str_join(const char *fmt, ...);
 int file_read_string(char *fpath, char *buf, int size);
 int file_read_value(char *fpath);

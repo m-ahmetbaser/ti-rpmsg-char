@@ -63,6 +63,31 @@ int get_child_dir_suffix(char *fpath, const char *child_name_pattern,
 	return ret;
 }
 
+int get_child_dir_pattern(char *fpath, const char *child_name_pattern,
+			 char *dir_name)
+{
+	struct dirent *iter;
+	DIR *parent;
+	int ret = -ENODEV;
+
+	parent = opendir(fpath);
+	if (!parent)
+		return -errno;
+
+	while ((iter = readdir(parent))) {
+		if (iter->d_type == DT_DIR &&
+			(strncmp(iter->d_name,child_name_pattern,strlen(child_name_pattern))
+			 == 0)) {
+			strcpy(dir_name,iter->d_name);
+			ret = 0;
+			break;
+		}
+	}
+
+	closedir(parent);
+	return ret;
+}
+
 int file_read_string(char *fpath, char *buf, int size)
 {
 	int fd, bytes;
