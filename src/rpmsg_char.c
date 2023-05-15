@@ -46,8 +46,6 @@
 #include <sys/stat.h>
 #include <linux/rpmsg.h>
 
-#define RPMSG_ADDR_ANY         0xFFFFFFFF
-
 #include "ti_rpmsg_char.h"
 #include "rpmsg_char_internal.h"
 
@@ -195,8 +193,7 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 	/* check if virtio device is decoupled from remoteproc core */
 	if (get_child_dir_pattern(fpath,"rproc-virtio",dir_name) == 0) {
 		strcat(fpath,dir_name);
-	}
-	else {
+	} else {
 		sprintf(fpath, "%s/remoteproc/remoteproc%u/remoteproc%u#vdev0buffer",
 		ept->rpath, remoteproc_id, remoteproc_id);
 	}

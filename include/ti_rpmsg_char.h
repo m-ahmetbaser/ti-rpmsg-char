@@ -40,7 +40,8 @@ extern "C" {
 #endif
 
 #define RPMSG_DEV_NAME_MAXLEN	32
-
+#define RPMSG_ADDR_ANY                  0xFFFFFFFF
+#define RPMSG_RESERVED_ADDRESSES        (1024)
 /*!
  * @brief Structure returned during rpmsg_char_open
  *
@@ -83,6 +84,9 @@ typedef struct rpmsg_char_dev rpmsg_char_dev_t;
  *                       length for the rpmsg device name is as per the virtio
  *                       rpmsg transport, RPMSG_DEV_NAME_MAXLEN (32 bytes)
  *
+ *  @param      local_endpt rpmsg local end-point address for the rpmsg device
+ *                           to open. Valid value is mandatory
+ *
  *  @param      remote_endpt rpmsg remote end-point address for the rpmsg device
  *                           to open. Valid value is mandatory
  *
@@ -99,8 +103,8 @@ typedef struct rpmsg_char_dev rpmsg_char_dev_t;
  *  @sa         rpmsg_char_close
  */
 rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
-				  int remote_endpt, char *eptdev_name,
-				  int flags);
+				  int local_endpt, int remote_endpt,
+				  char *eptdev_name, int flags);
 
 /*!
  *  @brief      Function to close and delete a previously created local endpoint
