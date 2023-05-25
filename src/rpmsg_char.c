@@ -223,6 +223,7 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 	char fpath[512];
 	char *rpath;
 	unsigned int ctrl_id;
+	unsigned int rpmsg_id;
 	int ret;
 
 	sprintf(virtio, "virtio%u", ept->virtio_id);
@@ -265,8 +266,12 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 		goto chrdev_nodir;
 	}
 
-	/* get rpmsg_ctrl id */
-	ret = get_child_dir_suffix(fpath, "rpmsg%u", &ctrl_id);
+	/* set default rpmsg_ctrl id to virtio id */
+	ctrl_id = ept->virtio_id;
+
+	/* check if rpmsg channel exists */
+	ret = get_child_dir_suffix(fpath, "rpmsg%u", &rpmsg_id);
+
 	/* check for backward compatibility if failed */
 	if (ret)
 		ret = get_child_dir_suffix(fpath, "rpmsg_ctrl%u", &ctrl_id);
