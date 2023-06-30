@@ -223,8 +223,8 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 	char fpath[512];
 	char *rpath;
 	unsigned int ctrl_id;
-	unsigned int rpmsg_id;
 	int ret;
+	char ctrl_path[512];
 
 	sprintf(virtio, "virtio%u", ept->virtio_id);
 	rpath = file_deref_link("/sys/bus/virtio/devices", virtio);
@@ -266,11 +266,40 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 		goto chrdev_nodir;
 	}
 
-	/* set default rpmsg_ctrl id to virtio id */
-	ctrl_id = ept->virtio_id;
-
-	/* check if rpmsg channel exists */
-	ret = get_child_dir_suffix(fpath, "rpmsg%u", &rpmsg_id);
+	/* With refactored rpmsg driver in upstream kernel6.1, rpmsg_ctrl device is under
+	 * the virtio directory. And the device number can be different from the
+	 * virtio device number and the rpmsg device number.
+	 */
+	sprintf(ctrl_path, "virtio%u.rpmsg_ctrl.0.0", ept->virtio_id);
+	dir = opendir(rpath);
+	if (dir) {
+		/*
+		 * find a directory that matches the rpmsg_ctrl
+		 * form virtio%d.rpmsg_ctrl.0.0
+		 */
+		while ((iter = readdir(dir))) {
+			if (iter->d_type == DT_DIR) {
+				if (!strcmp(iter->d_name, ctrl_path))
+					break;
+			}
+		}
+		if (iter) {
+			memset(&fpath, 0, sizeof(fpath));
+			sprintf(fpath, "%s/%s/rpmsg", rpath, iter->d_name);
+			if (check_dir(fpath)) {
+				fprintf(stderr, "%s: rpmsg directory doesn't exist under %s\n",
+					__func__, ept->rpmsg_dev_name);
+				ret = -ENOENT;
+			} else {
+				ret = get_child_dir_suffix(fpath, "rpmsg_ctrl%u", &ctrl_id);
+			}
+		} else {
+			ret = -ENOENT;
+		}
+	}
+	else  {
+		ret = -errno;
+	}
 
 	/* check for backward compatibility if failed */
 	if (ret)
@@ -379,7 +408,6 @@ static int _rpmsg_char_get_rpmsg_id(struct rpmsg_char_endpt *ept,
 
 		if (strcmp(dev_name, eptdev_name))
 			continue;
-
 		sscanf(iter->d_name, "rpmsg%u", &ept->rpmsg_id);
 		found = true;
 		break;
