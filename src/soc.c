@@ -42,7 +42,7 @@
 #include "rpmsg_char_internal.h"
 
 /* Increment this whenever new SoC data is added */
-#define NUM_SOC_FAMILY 8
+#define NUM_SOC_FAMILY 9
 
 struct soc_data {
 	const char *family_name;
@@ -128,6 +128,12 @@ const struct rproc_map am62ax_map[] = {
 	{ .id = DSP_C71_0,   .rproc_name = "7e000000.dsp",   },
 };
 
+/* TI K3 AM62Px SoCs */
+const struct rproc_map am62px_map[] = {
+	{ .id = R5F_WKUP0_0, .rproc_name = "78000000.r5f",   },
+        { .id = R5F_MCU0_0,  .rproc_name = "79000000.r5f",   },
+};
+
 const struct soc_data socs[NUM_SOC_FAMILY] = {
 	{
 		.family_name = "AM65X",
@@ -164,11 +170,16 @@ const struct soc_data socs[NUM_SOC_FAMILY] = {
 		.map = j784s4_map,
 		.num_rprocs = (sizeof(j784s4_map) / sizeof(struct rproc_map)),
 	},
-        {
-                .family_name = "AM62AX",
-                .map = am62ax_map,
-                .num_rprocs = (sizeof(am62ax_map) / sizeof(struct rproc_map)),
-        },
+	{
+		.family_name = "AM62AX",
+		.map = am62ax_map,
+		.num_rprocs = (sizeof(am62ax_map) / sizeof(struct rproc_map)),
+	},
+	{
+		.family_name = "AM62PX",
+		.map = am62px_map,
+		.num_rprocs = (sizeof(am62px_map) / sizeof(struct rproc_map)),
+	},
 };
 
 int _rpmsg_char_find_soc_family(const char *name, struct soc_rprocs *soc)
