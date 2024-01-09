@@ -71,7 +71,6 @@ struct rpmsg_char_endpt {
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static bool inited = false;
-static int soc_id = -1;
 static struct soc_rprocs soc_data;
 static struct rpmsg_char_endpt *ghead = NULL;
 static struct rpmsg_char_endpt *gtail = NULL;
@@ -373,7 +372,6 @@ static int _rpmsg_char_destroy_eptdev(int fd)
 static int _rpmsg_char_get_rpmsg_id(struct rpmsg_char_endpt *ept,
 				    char *eptdev_name)
 {
-	const struct rproc_map *r = ept->map;
 	bool found = false;
 	char rpmsg[16] = { 0 };
 	char fpath[512];
@@ -420,7 +418,6 @@ static int _rpmsg_char_get_rpmsg_id(struct rpmsg_char_endpt *ept,
 
 static int _rpmsg_char_get_local_endpt(struct rpmsg_char_endpt *ept)
 {
-	const struct rproc_map *r = ept->map;
 	char fpath[512] = { 0 };
 	char rpmsg[16] = { 0 };
 	char *rpath;
@@ -509,7 +506,7 @@ static void _rpmsg_char_cleanup(void)
 		next = iter->next;
 		ret = rpmsg_char_close(&iter->rcdev);
 		if (ret) {
-			fprintf(stderr, "rpmsg_char_close failed during cleanup, rcdev = 0x%x, ret = %d\n",
+			fprintf(stderr, "rpmsg_char_close failed during cleanup, rcdev = %p, ret = %d\n",
 				&iter->rcdev, ret);
 		}
 	}
@@ -625,7 +622,7 @@ int rpmsg_char_close(rpmsg_char_dev_t *rcdev)
 
 	ept = to_rpmsg_char_endpt(rcdev);
 	if (!_list_is_present(ept)) {
-		fprintf(stderr, "%s: invalid handle passed in rcdev = 0x%x\n",
+		fprintf(stderr, "%s: invalid handle passed in rcdev = %p\n",
 			__func__, rcdev);
 		ret = -ENOENT;
 		goto out;
