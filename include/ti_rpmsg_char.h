@@ -103,7 +103,8 @@ typedef struct rpmsg_char_dev rpmsg_char_dev_t;
  *  @sa         rpmsg_char_close
  */
 rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
-				  int local_endpt, int remote_endpt,
+				  unsigned int local_endpt,
+				  unsigned int remote_endpt,
 				  char *eptdev_name, int flags);
 
 /*!

@@ -19,10 +19,7 @@ Usage:
                          (default 14 based on current example firmwares)
 
 Examples:
-1. rpmsg_char_simple -r 2 -d ti.ipc4.ping-pong -p 13
-     Runs the example using device "ti.ipc4.ping-pong" and remote port 13
-     with rproc_id value of 2 (R5F_MAIN0_0), exchanges 100 messages
-2. rpmsg_char_simple -r 4 -n 10
+  rpmsg_char_simple -r 4 -n 10
      Runs the example using default rpmsg device "rpmsg_chrdev",
      remote port 14 with rproc_id value of 4 (R5F_MAIN1_0), exchanges
      10 messages

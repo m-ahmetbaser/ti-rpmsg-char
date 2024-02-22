@@ -87,7 +87,7 @@ int recv_msg(int fd, int len, char *reply_msg, int *reply_len)
 }
 
 /* single thread communicating with a single endpoint */
-int rpmsg_char_ping(int rproc_id, char *dev_name, int local_endpt, int remote_endpt,
+int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsigned int remote_endpt,
 		    int num_msgs)
 {
 	int ret = 0;
@@ -168,8 +168,8 @@ int main(int argc, char *argv[])
 	int ret, status, c;
 	int rproc_id = 0;
 	int num_msgs = NUM_ITERATIONS;
-	int remote_endpt = REMOTE_ENDPT;
-	int local_endpt = RPMSG_ADDR_ANY;
+	unsigned int remote_endpt = REMOTE_ENDPT;
+	unsigned int local_endpt = RPMSG_ADDR_ANY;
 	char *dev_name = NULL;
 
 	while (1) {

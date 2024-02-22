@@ -214,7 +214,7 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 }
 
 static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
-				    char *dev_name, int remote_port)
+				    char *dev_name, unsigned int remote_port)
 {
 	char virtio[16] = { 0 };
 	struct dirent *iter;
@@ -317,7 +317,8 @@ free_rpath:
 }
 
 static int _rpmsg_char_create_eptdev(struct rpmsg_char_endpt *ept,
-				     char *eptdev_name, int local_port, int remote_port)
+				     char *eptdev_name, unsigned int local_port,
+				     unsigned int remote_port)
 {
 	int fd, ret;
 	char ctrldev_path[32] = { 0 };
@@ -331,7 +332,7 @@ static int _rpmsg_char_create_eptdev(struct rpmsg_char_endpt *ept,
 		return fd;
 	}
 
-	if ((local_port != (int) RPMSG_ADDR_ANY) && (local_port <
+	if ((local_port != RPMSG_ADDR_ANY) && (local_port <
 					       RPMSG_RESERVED_ADDRESSES)) {
 		fprintf(stderr, "%s: invalid local address %d, should be more \
 			than %d \n", __func__, local_port,
@@ -550,8 +551,9 @@ static int _rpmsg_char_register_signal_handlers(void)
 }
 
 rpmsg_char_dev_t *rpmsg_char_open(enum rproc_id id, char *dev_name,
-				  int local_endpt, int remote_endpt, char *eptdev_name,
-				  int flags)
+				  unsigned int local_endpt,
+				  unsigned int remote_endpt,
+				  char *eptdev_name, int flags)
 {
 	struct rpmsg_char_endpt *ept = NULL;
 	char *def_dev_name = "rpmsg_chrdev";
