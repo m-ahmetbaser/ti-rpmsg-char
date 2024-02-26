@@ -113,8 +113,8 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
         printf("Created endpt device %s, fd = %d port = %d\n", eptdev_name,
 		rcdev->fd, rcdev->endpt);
 
-        printf("Exchanging %d messages with rpmsg device ti.ipc4.ping-pong on rproc id %d ...\n\n",
-		num_msgs, rproc_id);
+        printf("Exchanging %d messages with rpmsg device %s on rproc id %d ...\n\n",
+		num_msgs, eptdev_name, rproc_id);
 
 	for (i = 0; i < num_msgs; i++) {
 		memset(packet_buf, 0, sizeof(packet_buf));
