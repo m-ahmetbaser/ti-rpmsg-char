@@ -216,7 +216,7 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 				    char *dev_name, unsigned int remote_port)
 {
-	char virtio[16] = { 0 };
+	char virtio[32] = { 0 };
 	struct dirent *iter;
 	DIR *dir;
 	char fpath[512];
@@ -374,7 +374,7 @@ static int _rpmsg_char_get_rpmsg_id(struct rpmsg_char_endpt *ept,
 				    char *eptdev_name)
 {
 	bool found = false;
-	char rpmsg[16] = { 0 };
+	char rpmsg[32] = { 0 };
 	char fpath[512];
 	char dev_name[32];
 	char *rpath;
