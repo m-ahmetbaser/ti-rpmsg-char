@@ -93,10 +93,12 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 	int ret = 0;
 	int i = 0;
 	int packet_len;
-	char eptdev_name[32] = { 0 };
+	char eptdev_name[64] = { 0 };
 	char packet_buf[512] = { 0 };
 	rpmsg_char_dev_t *rcdev;
 	int flags = 0;
+	struct timespec ts_current;
+	struct timespec ts_end;
 
         /*
          * Open the remote rpmsg device identified by dev_name and bind the
@@ -121,6 +123,7 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		sprintf(packet_buf, "hello there %d!", i);
 		packet_len = strlen(packet_buf);
 		printf("Sending message #%d: %s\n", i, packet_buf);
+		clock_gettime(CLOCK_MONOTONIC, &ts_current);
 		ret = send_msg(rcdev->fd, (char *)packet_buf, packet_len);
 		if (ret < 0) {
 			printf("send_msg failed for iteration %d, ret = %d\n", i, ret);
@@ -132,12 +135,13 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		    goto out;
 		}
 
-		printf("Receiving message #%d: ", i);
 		ret = recv_msg(rcdev->fd, 256, (char *)packet_buf, &packet_len);
+		clock_gettime(CLOCK_MONOTONIC, &ts_end);
 		if (ret < 0) {
 			printf("recv_msg failed for iteration %d, ret = %d\n", i, ret);
 			goto out;
 		}
+		printf("Received message #%d: round trip delay(usecs) = %ld\n", i,ts_end.tv_nsec - ts_current.tv_nsec);
 		/* TODO: Verify data integrity */
 
 		/* TODO: Reduce number of prints */
