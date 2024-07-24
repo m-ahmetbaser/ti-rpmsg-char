@@ -94,7 +94,11 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 	int i = 0;
 	int packet_len;
 	char eptdev_name[64] = { 0 };
-	char packet_buf[512] = { 0 };
+	/*
+	 * Each RPMsg packet can have up to 496 bytes of data:
+	 * 512 bytes total - 16 byte header = 496
+	 */
+	char packet_buf[496] = { 0 };
 	rpmsg_char_dev_t *rcdev;
 	int flags = 0;
 	struct timespec ts_current;
