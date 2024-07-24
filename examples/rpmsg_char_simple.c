@@ -139,7 +139,7 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		    goto out;
 		}
 
-		ret = recv_msg(rcdev->fd, 256, (char *)packet_buf, &packet_len);
+		ret = recv_msg(rcdev->fd, 496, (char *)packet_buf, &packet_len);
 		clock_gettime(CLOCK_MONOTONIC, &ts_end);
 		if (ret < 0) {
 			printf("recv_msg failed for iteration %d, ret = %d\n", i, ret);
