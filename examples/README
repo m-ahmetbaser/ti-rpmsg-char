@@ -1,5 +1,5 @@
-rpmsg-char-simple application
-=============================
+rpmsg-char-simple
+=================
 
 rpmsg-char-simple is a very basic single-threaded application
 demonstrating the usage of the API provided by the ti-rpmsg-char
@@ -7,7 +7,7 @@ library to communicate messages to a remote processor exercising
 the kernel rpmsg_char driver and virtio-rpmsg transport.
 
 Usage:
-  rpmsg_char_simple [-r <rproc_id>] [-n <num_msgs>] [-d <rpmsg_dev_name>] [-p <remote_endpt>]
+  rpmsg_char_simple [-r <rproc_id>] [-n <num_msgs>] [-d <rpmsg_dev_name>] [-p <remote_endpt>] [-l <local_endpt>]
 
   Where:
     -r <rproc_id>        remote processor id to be used.
@@ -17,9 +17,50 @@ Usage:
                          (defaults to NULL, translates to rpmsg_chrdev)
     -p <remote_endpt>    remote end-point address of the rpmsg device
                          (default 14 based on current example firmwares)
+    -l <local_endpt>     local end-point address of the rpmsg device
+                         (default RPMSG_ADDR_ANY)
+                         (if set, must be greater than
+                         RPMSG_RESERVED_ADDRESSES = 1024)
 
 Examples:
   rpmsg_char_simple -r 4 -n 10
      Runs the example using default rpmsg device "rpmsg_chrdev",
      remote port 14 with rproc_id value of 4 (R5F_MAIN1_0), exchanges
      10 messages
+
+rpmsg-char-benchmark
+====================
+
+rpmsg-char-benchmark can be used to calculate average and worst-case round-trip
+latencies for RPMsg messages between Linux and a non-Linux core.
+
+Usage:
+  rpmsg_char_benchmark [-r <rproc_id>] [-n <num_msgs>] [-m <msg_length>] [-d <rpmsg_dev_name>] [-p <remote_endpt>] [-l <local_endpt>]
+
+  Where:
+    -r <rproc_id>        remote processor id to be used.
+                         Valid values are 0 to RPROC_ID_MAX
+    -n <num_msgs>        Number of messages to exchange (default 100)
+    -m <msg_length>      Number of characters to send per message (default 100)
+    -d <rpmsg_dev_name>  rpmsg device name
+                         (defaults to NULL, translates to rpmsg_chrdev)
+    -p <remote_endpt>    remote end-point address of the rpmsg device
+                         (default 14 based on current example firmwares)
+    -l <local_endpt>     local end-point address of the rpmsg device
+                         (default RPMSG_ADDR_ANY)
+                         (If manually set, must be greater than
+                         RPMSG_RESERVED_ADDRESSES = 1024)
+
+Examples:
+  rpmsg_char_benchmark -r 4 -n 1000000 -m 1
+     Runs the example using default rpmsg device "rpmsg_chrdev",
+     remote port 14 with rproc_id value of 4 (R5F_MAIN1_0), exchanges
+     1,000,000 messages that are 1 character long
+
+  stress-ng --cpu-method=all -c 4 & rpmsg_char_benchmark -r 4 -n 1000000 -m 496 & chrt -f -p 80 $!
+     Use with RT Linux
+     Runs the example using default rpmsg device "rpmsg_chrdev",
+     remote port 14 with rproc_id value of 4 (R5F_MAIN1_0), exchanges
+     1,000,000 messages that are 496 characters long.
+     Add a background load on Linux with stress-ng.
+     Set the rpmsg_char_benchmark application priority to 80.
