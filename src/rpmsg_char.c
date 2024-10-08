@@ -168,6 +168,9 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 	}
 
 	ept->rpath = file_deref_link("/sys/bus/platform/devices", r->rproc_name);
+	if (!ept->rpath || strncmp(ept->rpath,"/sys/devices/",13))
+		return ret;
+
 	if (check_dir(ept->rpath)) {
 		fprintf(stderr, "%s: %s device is mostly yet to be created!\n",
 			__func__, r->rproc_name);
@@ -176,7 +179,7 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 
 	/* retrieve the dynamically created kernel remoteproc id */
 	memset(&fpath, 0, sizeof(fpath));
-	sprintf(fpath, "%s/remoteproc", ept->rpath);
+	snprintf(fpath, sizeof(fpath), "%s/remoteproc", ept->rpath);
 	ret = get_child_dir_suffix(fpath, "remoteproc%u", &remoteproc_id);
 	if (ret) {
 		if (ret == -ENOENT) {
@@ -188,12 +191,12 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 
 	/* retrieve the dynamically created kernel virtio id */
 	memset(&fpath, 0, sizeof(fpath));
-	sprintf(fpath, "%s/remoteproc/remoteproc%u/", ept->rpath, remoteproc_id);
+	snprintf(fpath, sizeof(fpath), "%s/remoteproc/remoteproc%u/", ept->rpath, remoteproc_id);
 	/* check if virtio device is decoupled from remoteproc core */
 	if (get_child_dir_pattern(fpath,"rproc-virtio",dir_name) == 0) {
-		strcat(fpath,dir_name);
+		strncat(fpath,dir_name,sizeof(fpath) - strlen(fpath)-1);
 	} else {
-		sprintf(fpath, "%s/remoteproc/remoteproc%u/remoteproc%u#vdev0buffer",
+		snprintf(fpath, sizeof(fpath),"%s/remoteproc/remoteproc%u/remoteproc%u#vdev0buffer",
 		ept->rpath, remoteproc_id, remoteproc_id);
 	}
 
@@ -221,14 +224,15 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 	DIR *dir;
 	char fpath[512];
 	char *rpath;
-	unsigned int ctrl_id;
-	int ret;
+	unsigned int ctrl_id = 0;
+	int ret = -ENODEV;
 	char ctrl_path[512];
 
 	sprintf(virtio, "virtio%u", ept->virtio_id);
 	rpath = file_deref_link("/sys/bus/virtio/devices", virtio);
-	if (!rpath)
-		return -ENOENT;
+
+	if (!rpath || strncmp(ept->rpath,"/sys/",5))
+		return ret;
 
 	sprintf(ept->rpmsg_dev_name, "virtio%u.%s.-1.%d", ept->virtio_id,
 		dev_name, remote_port);
@@ -310,7 +314,8 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 	ept->ctrl_id = ctrl_id;
 
 chrdev_nodir:
-	closedir(dir);
+	if (dir)
+		closedir(dir);
 free_rpath:
 	free(rpath);
 	return ret;
@@ -337,6 +342,7 @@ static int _rpmsg_char_create_eptdev(struct rpmsg_char_endpt *ept,
 		fprintf(stderr, "%s: invalid local address %d, should be more \
 			than %d \n", __func__, local_port,
 			RPMSG_RESERVED_ADDRESSES);
+		close(fd);
 		return 1;
 	}
 
@@ -400,14 +406,14 @@ static int _rpmsg_char_get_rpmsg_id(struct rpmsg_char_endpt *ept,
 
 		memset(&fpath, 0, sizeof(fpath));
 		memset(&dev_name, 0, sizeof(dev_name));
-		sprintf(fpath, "%s/%s/name", rpath, iter->d_name);
+		snprintf(fpath, sizeof(fpath),"%s/%s/name", rpath, iter->d_name);
 		ret = file_read_string(fpath, dev_name, sizeof(dev_name));
 		if (ret < 0)
 			continue;
 
 		if (strcmp(dev_name, eptdev_name))
 			continue;
-		sscanf(iter->d_name, "rpmsg%u", &ept->rpmsg_id);
+		sscanf(iter->d_name, "rpmsg%u", (unsigned int*) &ept->rpmsg_id);
 		found = true;
 		break;
 	}
