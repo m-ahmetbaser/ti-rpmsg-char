@@ -194,7 +194,11 @@ static int _rpmsg_char_find_rproc(struct rpmsg_char_endpt *ept,
 	snprintf(fpath, sizeof(fpath), "%s/remoteproc/remoteproc%u/", ept->rpath, remoteproc_id);
 	/* check if virtio device is decoupled from remoteproc core */
 	if (get_child_dir_pattern(fpath,"rproc-virtio",dir_name) == 0) {
-		strncat(fpath,dir_name,sizeof(fpath) - strlen(fpath)-1);
+		char *result = strncat(fpath,dir_name,sizeof(fpath) - strlen(fpath)-1);
+		fpath[sizeof(fpath) - 1] = '\0';
+		if (result == NULL) {
+			fprintf(stderr, "%s: Error concatenating strings\n", __func__);
+		}
 	} else {
 		snprintf(fpath, sizeof(fpath),"%s/remoteproc/remoteproc%u/remoteproc%u#vdev0buffer",
 		ept->rpath, remoteproc_id, remoteproc_id);
