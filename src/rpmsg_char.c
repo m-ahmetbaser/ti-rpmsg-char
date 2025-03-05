@@ -278,6 +278,7 @@ static int _rpmsg_char_find_ctrldev(struct rpmsg_char_endpt *ept,
 	 * virtio device number and the rpmsg device number.
 	 */
 	sprintf(ctrl_path, "virtio%u.rpmsg_ctrl.0.0", ept->virtio_id);
+	closedir(dir);
 	dir = opendir(rpath);
 	if (dir) {
 		/*
