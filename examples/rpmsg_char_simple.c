@@ -3,7 +3,7 @@
  *
  * Simple Example application using rpmsg-char library
  *
- * Copyright (c) 2020 Texas Instruments Incorporated - https://www.ti.com
+ * Copyright (c) 2020-2025 Texas Instruments Incorporated - https://www.ti.com
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -101,10 +101,8 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 	char packet_buf[496] = { 0 };
 	rpmsg_char_dev_t *rcdev;
 	int flags = 0;
-	struct timespec ts_current;
-	struct timespec ts_end;
 
-        /*
+	/*
          * Open the remote rpmsg device identified by dev_name and bind the
 	 * device to a local end-point used for receiving messages from
 	 * remote processor
@@ -112,14 +110,14 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 	sprintf(eptdev_name, "rpmsg-char-%d-%d", rproc_id, getpid());
 	rcdev = rpmsg_char_open(rproc_id, dev_name, local_endpt, remote_endpt,
 				eptdev_name, flags);
-        if (!rcdev) {
+	if (!rcdev) {
 		perror("Can't create an endpoint device");
 		return -EPERM;
-        }
-        printf("Created endpt device %s, fd = %d port = %d\n", eptdev_name,
+	}
+	printf("Created endpt device %s, fd = %d port = %d\n", eptdev_name,
 		rcdev->fd, rcdev->endpt);
 
-        printf("Exchanging %d messages with rpmsg device %s on rproc id %d ...\n\n",
+	printf("Exchanging %d messages with rpmsg device %s on rproc id %d ...\n\n",
 		num_msgs, eptdev_name, rproc_id);
 
 	for (i = 0; i < num_msgs; i++) {
@@ -127,7 +125,6 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		sprintf(packet_buf, "hello there %d!", i);
 		packet_len = strlen(packet_buf);
 		printf("Sending message #%d: %s\n", i, packet_buf);
-		clock_gettime(CLOCK_MONOTONIC, &ts_current);
 		ret = send_msg(rcdev->fd, (char *)packet_buf, packet_len);
 		if (ret < 0) {
 			printf("send_msg failed for iteration %d, ret = %d\n", i, ret);
@@ -136,16 +133,14 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		if (ret != packet_len) {
 			printf("bytes written does not match send request, ret = %d, packet_len = %d\n",
 				i, ret);
-		    goto out;
+			goto out;
 		}
 
 		ret = recv_msg(rcdev->fd, 496, (char *)packet_buf, &packet_len);
-		clock_gettime(CLOCK_MONOTONIC, &ts_end);
 		if (ret < 0) {
 			printf("recv_msg failed for iteration %d, ret = %d\n", i, ret);
 			goto out;
 		}
-		printf("Received message #%d: round trip delay(usecs) = %ld\n", i,ts_end.tv_nsec - ts_current.tv_nsec);
 		/* TODO: Verify data integrity */
 
 		/* TODO: Reduce number of prints */
@@ -166,7 +161,7 @@ out:
 void usage()
 {
 	printf("Usage: rpmsg_char_simple [-r <rproc_id>] [-n <num_msgs>] [-d \
-	       <rpmsg_dev_name] [-p <remote_endpt] [-l <local_endpt] \n");
+	       <rpmsg_dev_name>] [-p <remote_endpt>] [-l <local_endpt>] \n");
 	printf("\t\tDefaults: rproc_id: 0 num_msgs: %d rpmsg_dev_name: NULL remote_endpt: %d\n",
 		NUM_ITERATIONS, REMOTE_ENDPT);
 }
