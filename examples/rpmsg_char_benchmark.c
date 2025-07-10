@@ -60,28 +60,24 @@
 #define MSG_LENGTH_MAX	496
 
 /*
- * This test can plot round-trip latencies up to 20 msec in a histogram output.
- * Any latencies greater than 20 msec will be rounded down to 20 msec in the
- * histogram plot.
- *
- * Worst-case latency will be correctly reported, even if it is greater than 20 msec.
- *
- * Average latency is calculated with the histogram datapoints, which means that
- * any latencies greater than 20 msec are rounded down to 20 msec in the
- * calculation.
+ * This test can plot round-trip latencies up to 9 sec in a histogram output.
+ * A Linux system should not have 9 sec latencies. However, if there are any
+ * latencies greater than 9 sec, they will be reported in the terminal, and then
+ * the latencies will be rounded down to 9 sec for the
+ * histogram plot and for worst-case and average latency calculations.
  *
  * Latencies are measured in microseconds (usec)
  */
-#define LATENCY_RANGE 20000
+#define LATENCY_RANGE 9000000
 
 /*
  * This test was designed to run for no more than
- * 450,000,000,000,000 (450 Trillion) test runs.
+ * 1,000,000,000,000 (1 Trillion) test runs.
  * More details in the "average latency" calculation below.
  * If more test runs are needed, the calculations for
  * average latency must be rewritten.
  */
-#define NUM_MSGS_MAX 450000000000000
+#define NUM_MSGS_MAX 1000000000000
 
 int send_msg(int fd, char *msg, int len)
 {
@@ -201,9 +197,6 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		printf("packet_len = %d, msg_length = %d\n", packet_len, msg_length);
 	}
 
-	/* TODO: Delete this print statement */
-	printf("packet_len = %d, msg_length = %d\n", packet_len, msg_length);
-
 	for (i = 0; i < num_msgs; i++) {
 
 		/* remove prints to speed up the test execution time */
@@ -236,18 +229,21 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 		latency = (ts_end.tv_nsec - ts_current.tv_nsec) / 1000;
 
 		/*
-		 * If latency is greater than LATENCY_RANGE:
-		 * - Print latency
-		 * - Update latency_worst_case if latency > previous latency_worst_case
-		 * - Record as LATENCY_RANGE for histogram & average calculation
+		 * If latency > latency_worst_case:
+		 * - If latency > LATENCY_RANGE:
+		 *     - Print latency
+		 *     - Set latency = LATENCY_RANGE
+		 *       This ensures we get notified of every latency > LATENCY_RANGE
+		 * - set latency_worst_case = latency
 		 * - Continue test
 		 */
-		if (latency > LATENCY_RANGE) {
-			printf("Large latency measured: %d usec\n", latency);
-			printf("latency will be rounded to 20,000 usec for histogram & average calculation.\n");
-			if (latency > latency_worst_case)
-				latency_worst_case = latency;
-			latency = LATENCY_RANGE;
+		if (latency > latency_worst_case) {
+			if (latency > LATENCY_RANGE) {
+				printf("Large latency measured: %d usec\n", latency);
+				printf("latency will be rounded to 9,000,000 usec for histogram & calculations.\n");
+				latency = LATENCY_RANGE;
+			}
+			latency_worst_case = latency;
 		}
 
 		/* increment the counter for that specific latency measurement */
@@ -256,38 +252,24 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 
 	clock_gettime(CLOCK_MONOTONIC, &ts_end_test);
 
-	/* find worst-case latency */
-	/* if there were latencies > 20,000 usec, latency_worst_case should already be set */
-	/* otherwise, iterate until we find the worst-case latency */
-	if (latency_worst_case == 0) {
-		for (i = LATENCY_RANGE; i > 0; i--) {
-			if (latencies[i] != 0) {
-				latency_worst_case = i;
-				break;
-			}
-		}
-	}
-
 	/*
 	 * Find the average latency
 	 * max value of a long long int: 9,223,372,036,854,775,807
-	 * Let's keep any variable from going above 9,000,000,000,000,000,000
-	 * The largest latency we are recording for this calculation is 20,000 usec
-	 * Thus, we need to keep the total number of test iterations below
-	 * 9,000,000,000,000,000,000 / 20,000 = 450,000,000,000,000
+	 * Let's keep any variable from going above 9,000,000,000,000,000,000.
+	 * Let's set 1 Trillion as the max test iterations (1,000,000,000,000).
+	 * Thus, the max latency that can be recorded is
+	 * 9,000,000,000,000,000,000 / 1,000,000,000,000 = 9,000,000 usec = 9sec
 	 *
-	 * NOTE!!!
-	 * Latencies above 20 msec get truncated for this calculation, so the
-	 * average latency calculation is technically NOT accurate
-	 * if worst case latency > 20,000 usec. This rounding may not affect the
-	 * calculated average if there are a high number of tests, and a low
-	 * number of rounded latencies. However, the exact impact of the rounding
-	 * is unknown, since only the single worst latency above 20,000 usec is
-	 * saved in the latency_worst_case variable.
+	 * Realistically, a Linux system should never have a 9 sec delay. But
+	 * keep in mind that any latencies above 9 sec will get truncated to
+	 * 9 sec.
 	 */
 
-	/* iterate through all 20,000 possible usec latency measurements */
-	for (i = LATENCY_RANGE; i > 0; i--) {
+	/*
+	 * Iterate through all possible latency measurements between
+	 * latency_worst_case and 0 usec
+	 */
+	for (i = latency_worst_case; i > 0; i--) {
 		/* get the weighted average of each latency measurement */
 		/* e.g., if latencies[60] = 17, that means there was a latency of 60us 17 times */
 		latency_average = latency_average + (latencies[i] * i);
@@ -300,7 +282,7 @@ int rpmsg_char_ping(int rproc_id, char *dev_name, unsigned int local_endpt, unsi
 	 */
 	file_ptr = fopen("histogram.txt", "w");
 
-	for (i = 0; i <= LATENCY_RANGE; i++)
+	for (i = 0; i <= latency_worst_case; i++)
 	{
 		fprintf(file_ptr, "%lld , ", i);
 		fprintf(file_ptr, "%lld", latencies[i]);
