@@ -1,4 +1,4 @@
-ti-rpmsg-char (0.6.9-1) bookworm; urgency=medium
+libti-rpmsg-char (0.6.9-1) bookworm; urgency=medium
 
   * Initial release.
 
