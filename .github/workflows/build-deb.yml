@@ -1,0 +1,51 @@
+name: Build DEB Packages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-22.04-arm
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            debhelper \
+            devscripts \
+            build-essential \
+            fakeroot
+
+      - name: Build DEB package
+        run: |
+          # Make rules executable
+          chmod +x debian/rules
+
+          # Build the package
+          dpkg-buildpackage -us -uc -b
+
+      - name: Get package info
+        id: pkg_info
+        run: |
+          DEB_FILE=$(ls ../*.deb | head -n1)
+          echo "filename=$DEB_FILE" >> $GITHUB_OUTPUT
+          echo "Package built: $DEB_FILE"
+
+          # Show package contents
+          dpkg-deb --contents "$DEB_FILE"
+
+      - name: Move DEB package to upload directory
+        run: |
+          mkdir -p ./upload
+          cp ../*.deb ./upload/
+
+      - name: Upload DEB package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ti-rpmsg-char
+          path: "./upload/*.deb"
+          retention-days: 90

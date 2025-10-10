@@ -7,3 +7,14 @@ export DH_VERBOSE=1
 
 %:
 	dh $@ --with autoreconf
+
+override_dh_auto_install:
+	dh_auto_install
+
+	install -d debian/libti-rpmsg-char/usr/lib/aarch64-linux-gnu
+	install -d debian/libti-rpmsg-char/usr/include
+	install -m 644 debian/tmp/usr/include/* debian/libti-rpmsg-char/usr/include/
+	rsync -a debian/tmp/usr/lib/aarch64-linux-gnu/* debian/libti-rpmsg-char/usr/lib/aarch64-linux-gnu/
+
+	install -d debian/ti-rpmsg-char-tools/usr/bin
+	install -m 755 examples/.libs/rpmsg_char_simple debian/ti-rpmsg-char-tools/usr/bin/

@@ -1,4 +1,4 @@
-Source: ti-rpmsg-char
+Source: libti-rpmsg-char
 Section: misc
 Priority: extra
 Maintainer: Gemstone Dev Team <dev@t3gemstone.org>
@@ -9,10 +9,18 @@ Build-Depends:
 Standards-Version: 4.5.1
 Homepage: https://git.ti.com/gitweb?p=rpmsg/ti-rpmsg-char.git;a=summary
 
-Package: ti-rpmsg-char
+Package: libti-rpmsg-char
 Architecture: arm64
 Depends:
  ${shlibs:Depends}
  , ${misc:Depends}
 Description: TI RPMsg Char Package
  TI RPMsg Char Package
+
+Package: ti-rpmsg-char-tools
+Architecture: arm64
+Depends:
+ libti-rpmsg-char
+ , ${misc:Depends}
+Description: TI RPMsg Char Example Applications
+ TI RPMsg Char Example Applications
